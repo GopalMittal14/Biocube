@@ -1,0 +1,29 @@
+[
+  {
+    "id": "user_001",
+    "username": "demo",
+    "email": "demo@biocube.com",
+    "fullName": "Demo User",
+    "phoneNumber": "+1234567890",
+    "profileImageUrl": null,
+    "isFirstLogin": true
+  },
+  {
+    "id": "user_002",
+    "username": "john",
+    "email": "john@biocube.com",
+    "fullName": "John Doe",
+    "phoneNumber": "+1987654321",
+    "profileImageUrl": null,
+    "isFirstLogin": false
+  },
+  {
+    "id": "user_003",
+    "username": "admin",
+    "email": "admin@biocube.com",
+    "fullName": "Admin User",
+    "phoneNumber": "+1122334455",
+    "profileImageUrl": null,
+    "isFirstLogin": false
+  }
+]

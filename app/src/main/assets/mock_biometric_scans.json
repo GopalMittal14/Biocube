@@ -1,0 +1,37 @@
+[
+  {
+    "id": "scan_001",
+    "type": "FACE_SCAN",
+    "name": "Face Scan",
+    "description": "Scan your face for authentication",
+    "isCompleted": false
+  },
+  {
+    "id": "scan_002",
+    "type": "EYE_SCAN",
+    "name": "Eye Scan",
+    "description": "Scan your eyes for iris recognition",
+    "isCompleted": false
+  },
+  {
+    "id": "scan_003",
+    "type": "VOICE_SCAN",
+    "name": "Voice Scan",
+    "description": "Record your voice for authentication",
+    "isCompleted": false
+  },
+  {
+    "id": "scan_004",
+    "type": "PALM_SCAN",
+    "name": "Palm Scan",
+    "description": "Scan your palm for vein pattern recognition",
+    "isCompleted": false
+  },
+  {
+    "id": "scan_005",
+    "type": "FINGER_PRINT",
+    "name": "Fingerprint",
+    "description": "Scan your fingerprint for authentication",
+    "isCompleted": false
+  }
+]

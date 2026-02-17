@@ -1,0 +1,38 @@
+[
+  {
+    "id": "service_001",
+    "name": "e-Visa",
+    "description": "Apply for electronic visa services",
+    "type": "E_VISA"
+  },
+  {
+    "id": "service_002",
+    "name": "Check In",
+    "description": "Mark your attendance - Check In",
+    "type": "CHECK_IN"
+  },
+  {
+    "id": "service_003",
+    "name": "Check Out",
+    "description": "Mark your attendance - Check Out",
+    "type": "CHECK_OUT"
+  },
+  {
+    "id": "service_004",
+    "name": "Insurance",
+    "description": "Manage your insurance policies",
+    "type": "INSURANCE"
+  },
+  {
+    "id": "service_005",
+    "name": "Banking",
+    "description": "Access banking services",
+    "type": "BANKING"
+  },
+  {
+    "id": "service_006",
+    "name": "Attendance",
+    "description": "View attendance history and reports",
+    "type": "ATTENDANCE"
+  }
+]
