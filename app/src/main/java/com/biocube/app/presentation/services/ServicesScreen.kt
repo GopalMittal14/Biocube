@@ -1,5 +1,9 @@
 package com.biocube.app.presentation.services
 
+import android.app.Activity
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -7,18 +11,19 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.biocube.app.domain.model.Service
 import com.biocube.app.domain.model.ServiceType
+import com.biocube.app.presentation.faceauth.FaceAuthActivity
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,7 +33,33 @@ fun ServicesScreen(
 ) {
     val servicesState by viewModel.servicesState.collectAsState()
 
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    var pendingAction by remember { mutableStateOf<ServiceType?>(null) }
+
+    val faceAuthLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val action = pendingAction
+        pendingAction = null
+        if (result.resultCode == Activity.RESULT_OK && action != null) {
+            val message = when (action) {
+                ServiceType.CHECK_IN -> "Check-in successful"
+                ServiceType.CHECK_OUT -> "Check-out successful"
+                else -> return@rememberLauncherForActivityResult
+            }
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = message,
+                    duration = SnackbarDuration.Short
+                )
+            }
+        }
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Services") },
@@ -71,7 +102,17 @@ fun ServicesScreen(
                         items(state.services) { service ->
                             ServiceCard(
                                 service = service,
-                                onClick = { viewModel.onServiceClick(service) }
+                                onClick = {
+                                    when (service.type) {
+                                        ServiceType.CHECK_IN, ServiceType.CHECK_OUT -> {
+                                            pendingAction = service.type
+                                            faceAuthLauncher.launch(
+                                                Intent(context, FaceAuthActivity::class.java)
+                                            )
+                                        }
+                                        else -> viewModel.onServiceClick(service)
+                                    }
+                                }
                             )
                         }
                     }

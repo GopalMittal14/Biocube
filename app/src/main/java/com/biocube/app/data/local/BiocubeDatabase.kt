@@ -15,7 +15,7 @@ import com.biocube.app.data.local.entity.UserEntity
         LocationEntity::class,
         FaceScanEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class BiocubeDatabase : RoomDatabase() {

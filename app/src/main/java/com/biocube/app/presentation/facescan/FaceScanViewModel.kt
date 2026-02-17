@@ -2,6 +2,10 @@ package com.biocube.app.presentation.facescan
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.biocube.app.data.faceauth.FaceAuthService
+import com.biocube.app.data.faceauth.FaceModelUnavailableException
+import com.biocube.app.data.faceauth.FloatArrayCodec
+import com.biocube.app.data.faceauth.NoFaceDetectedException
 import com.biocube.app.data.local.dao.FaceScanDao
 import com.biocube.app.data.local.entity.FaceScanEntity
 import com.biocube.app.domain.model.User
@@ -24,7 +28,8 @@ sealed class FaceScanSaveState {
 @HiltViewModel
 class FaceScanViewModel @Inject constructor(
     private val faceScanDao: FaceScanDao,
-    private val userRepository: IUserRepository
+    private val userRepository: IUserRepository,
+    private val faceAuthService: FaceAuthService
 ) : ViewModel() {
 
     private val _saveState = MutableStateFlow<FaceScanSaveState>(FaceScanSaveState.Idle)
@@ -41,15 +46,26 @@ class FaceScanViewModel @Inject constructor(
                     _saveState.value = FaceScanSaveState.Error("No user logged in")
                     return@launch
                 }
+
+                val embedding = faceAuthService.enrollFromImage(user.id, imagePath)
+                val embeddingBytes = FloatArrayCodec.toByteArray(embedding)
+
                 faceScanDao.deleteFaceScanByUserId(user.id)
                 val faceScan = FaceScanEntity(
                     id = UUID.randomUUID().toString(),
                     userId = user.id,
                     imagePath = imagePath,
+                    embedding = embeddingBytes,
                     capturedAt = System.currentTimeMillis()
                 )
                 faceScanDao.insertFaceScan(faceScan)
                 _saveState.value = FaceScanSaveState.Success
+            } catch (e: NoFaceDetectedException) {
+                _saveState.value = FaceScanSaveState.Error("No face detected. Please retake the photo in good lighting.")
+            } catch (e: FaceModelUnavailableException) {
+                _saveState.value = FaceScanSaveState.Error(
+                    "Face model not available. Please contact support to install a valid face_auth.tflite model."
+                )
             } catch (e: Exception) {
                 _saveState.value = FaceScanSaveState.Error(e.localizedMessage ?: "Failed to save face scan")
             }

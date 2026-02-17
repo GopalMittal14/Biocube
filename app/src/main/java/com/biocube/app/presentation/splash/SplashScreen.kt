@@ -1,40 +1,72 @@
 package com.biocube.app.presentation.splash
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.biocube.app.R
+import com.biocube.app.presentation.faceauth.FaceAuthActivity
 import com.biocube.app.domain.repository.IUserRepository
+import com.biocube.app.data.faceauth.FaceAuthService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 import javax.inject.Inject
+import android.app.Activity
+import android.content.Intent
 
 @Composable
 fun SplashScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToUserTrainings: () -> Unit,
-    userRepository: IUserRepository = hiltViewModel<SplashViewModel>().userRepository
+    viewModel: SplashViewModel = hiltViewModel()
 ) {
-    LaunchedEffect(Unit) {
-        delay(2000) // Show splash for 2 seconds
-        
-        val currentUser = userRepository.getCurrentUser().firstOrNull()
-        if (currentUser != null) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var hasDecided by remember { mutableStateOf(false) }
+
+    val faceAuthLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (hasDecided) return@rememberLauncherForActivityResult
+        hasDecided = true
+
+        if (result.resultCode == Activity.RESULT_OK) {
             onNavigateToUserTrainings()
         } else {
+            scope.launch {
+                viewModel.logout()
+                onNavigateToLogin()
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        delay(2000) // Show splash for 2 seconds
+
+        val currentUser = viewModel.getCurrentUserSync()
+        if (currentUser == null) {
+            hasDecided = true
             onNavigateToLogin()
+            return@LaunchedEffect
+        }
+
+        val requireFaceAuth = viewModel.hasEnrolledFace(currentUser.id)
+        if (requireFaceAuth) {
+            faceAuthLauncher.launch(Intent(context, FaceAuthActivity::class.java))
+        } else {
+            hasDecided = true
+            onNavigateToUserTrainings()
         }
     }
 
@@ -66,5 +98,14 @@ fun SplashScreen(
 
 @HiltViewModel
 class SplashViewModel @Inject constructor(
-    val userRepository: IUserRepository
+    private val userRepository: IUserRepository,
+    private val faceAuthService: FaceAuthService
 ) : androidx.lifecycle.ViewModel()
+
+{
+    suspend fun getCurrentUserSync() = userRepository.getCurrentUserSync()
+
+    suspend fun hasEnrolledFace(userId: String): Boolean = faceAuthService.hasEnrollment(userId)
+
+    suspend fun logout() = userRepository.logout()
+}

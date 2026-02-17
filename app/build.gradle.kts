@@ -107,6 +107,10 @@ dependencies {
     implementation("org.tensorflow:tensorflow-lite:2.14.0")
     implementation("org.tensorflow:tensorflow-lite-support:0.4.4")
     implementation("org.tensorflow:tensorflow-lite-gpu:2.14.0")
+
+    // Face Authentication (ML Kit + image orientation)
+    implementation("com.google.mlkit:face-detection:16.1.6")
+    implementation("androidx.exifinterface:exifinterface:1.3.7")
     
     // Coil for Image Loading
     implementation("io.coil-kt:coil-compose:2.5.0")

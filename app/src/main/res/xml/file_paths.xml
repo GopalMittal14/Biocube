@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
     <files-path name="face_scans" path="face_scans/" />
+    <files-path name="face_auth_attempts" path="face_auth_attempts/" />
 </paths>

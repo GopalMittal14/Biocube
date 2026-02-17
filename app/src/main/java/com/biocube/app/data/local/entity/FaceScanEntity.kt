@@ -22,5 +22,10 @@ data class FaceScanEntity(
     val id: String,
     val userId: String,
     val imagePath: String,
+    /**
+     * L2-normalized face embedding produced by the on-device TFLite model.
+     * Stored as little-endian float32 bytes.
+     */
+    val embedding: ByteArray?,
     val capturedAt: Long
 )
