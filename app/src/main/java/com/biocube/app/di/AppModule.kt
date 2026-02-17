@@ -3,6 +3,7 @@ package com.biocube.app.di
 import android.content.Context
 import androidx.room.Room
 import com.biocube.app.data.local.BiocubeDatabase
+import com.biocube.app.data.local.dao.FaceScanDao
 import com.biocube.app.data.local.dao.LocationDao
 import com.biocube.app.data.local.dao.UserDao
 import com.biocube.app.data.remote.api.BiocubeApi
@@ -92,6 +93,12 @@ object AppModule {
     @Singleton
     fun provideLocationDao(database: BiocubeDatabase): LocationDao {
         return database.locationDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideFaceScanDao(database: BiocubeDatabase): FaceScanDao {
+        return database.faceScanDao()
     }
 
     @Provides

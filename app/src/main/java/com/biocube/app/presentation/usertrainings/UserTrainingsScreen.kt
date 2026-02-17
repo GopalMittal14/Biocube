@@ -1,6 +1,7 @@
 package com.biocube.app.presentation.usertrainings
 
 import android.app.Activity
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.biocube.app.domain.model.BiometricScan
 import com.biocube.app.domain.model.ScanType
+import com.biocube.app.presentation.facescan.FaceScanActivity
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -112,7 +114,16 @@ fun UserTrainingsScreen(
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             items(state.scans) { scan ->
-                                ScanCard(scan = scan, onClick = { viewModel.onScanClick(scan) })
+                                ScanCard(
+                                    scan = scan,
+                                    onClick = {
+                                        if (scan.type == ScanType.FACE_SCAN) {
+                                            context.startActivity(Intent(context, FaceScanActivity::class.java))
+                                        } else {
+                                            viewModel.onScanClick(scan)
+                                        }
+                                    }
+                                )
                             }
                         }
                     }
