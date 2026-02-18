@@ -5,25 +5,43 @@ import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.RadioButtonUnchecked
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.biocube.app.domain.model.Service
-import com.biocube.app.domain.model.ServiceType
-import com.biocube.app.presentation.faceauth.FaceAuthActivity
-import kotlinx.coroutines.launch
+import com.biocube.auth.face.FaceAuthActivity
+import com.biocube.core.domain.model.Service
+import com.biocube.core.domain.model.ServiceType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,176 +50,125 @@ fun ServicesScreen(
     viewModel: ServicesViewModel = hiltViewModel()
 ) {
     val servicesState by viewModel.servicesState.collectAsState()
-
     val context = LocalContext.current
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
-    var pendingAction by remember { mutableStateOf<ServiceType?>(null) }
 
     val faceAuthLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        val action = pendingAction
-        pendingAction = null
-        if (result.resultCode == Activity.RESULT_OK && action != null) {
-            val message = when (action) {
-                ServiceType.CHECK_IN -> "Check-in successful"
-                ServiceType.CHECK_OUT -> "Check-out successful"
-                else -> return@rememberLauncherForActivityResult
-            }
-            scope.launch {
-                snackbarHostState.showSnackbar(
-                    message = message,
-                    duration = SnackbarDuration.Short
-                )
-            }
+        if (result.resultCode == Activity.RESULT_OK) {
+            // Handle successful face auth
         }
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Services") },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateToUserTrainings) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
-                )
+                title = { Text("Services") }
             )
         }
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
             when (val state = servicesState) {
                 is ServicesState.Loading -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
                 is ServicesState.Success -> {
                     LazyColumn(
                         modifier = Modifier
-                            .weight(1f)
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                            .fillMaxSize()
+                            .padding(16.dp)
                     ) {
                         items(state.services) { service ->
-                            ServiceCard(
-                                service = service,
-                                onClick = {
-                                    when (service.type) {
-                                        ServiceType.CHECK_IN, ServiceType.CHECK_OUT -> {
-                                            pendingAction = service.type
-                                            faceAuthLauncher.launch(
-                                                Intent(context, FaceAuthActivity::class.java)
-                                            )
-                                        }
-                                        else -> viewModel.onServiceClick(service)
+                            ServiceItem(service = service, onServiceClick = {
+                                viewModel.onServiceClick(it)
+                                when (it.type) {
+                                    ServiceType.CHECK_IN, ServiceType.CHECK_OUT -> {
+                                        val intent = Intent(context, FaceAuthActivity::class.java)
+                                        faceAuthLauncher.launch(intent)
+                                    }
+                                    else -> {
+                                        // Handle other service types
                                     }
                                 }
-                            )
+                            })
+                        }
+                        item {
+                            Button(
+                                onClick = onNavigateToUserTrainings,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 16.dp)
+                            ) {
+                                Text("User Training")
+                            }
                         }
                     }
                 }
                 is ServicesState.Error -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = state.message,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
+                    Text(
+                        text = state.message,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
                 }
-            }
-
-            // User Trainings Button Footer
-            Button(
-                onClick = onNavigateToUserTrainings,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 16.dp)
-                    .height(56.dp)
-            ) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("User Trainings", fontSize = 16.sp)
             }
         }
     }
 }
 
 @Composable
-fun ServiceCard(service: Service, onClick: () -> Unit) {
+fun ServiceItem(
+    service: Service,
+    onServiceClick: (Service) -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            .padding(vertical = 8.dp)
+            .clickable { onServiceClick(service) },
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Icon(
-                imageVector = getServiceIcon(service.type),
-                contentDescription = service.name,
-                modifier = Modifier.size(48.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-
-            Spacer(modifier = Modifier.width(16.dp))
-
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = service.name,
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Bold
                 )
-                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = service.description,
                     fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = Color.Gray
                 )
             }
-
+            if (service.isAvailable) {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = "Available",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.RadioButtonUnchecked,
+                    contentDescription = "Unavailable",
+                    tint = Color.Gray
+                )
+            }
             Icon(
-                imageVector = Icons.Default.ArrowForward,
-                contentDescription = "Open",
-                tint = MaterialTheme.colorScheme.primary
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = "Start Service",
+                tint = Color.Gray
             )
         }
-    }
-}
-
-fun getServiceIcon(serviceType: ServiceType): ImageVector {
-    return when (serviceType) {
-        ServiceType.E_VISA -> Icons.Default.CardTravel
-        ServiceType.ATTENDANCE -> Icons.Default.CalendarToday
-        ServiceType.CHECK_IN -> Icons.Default.CheckCircle
-        ServiceType.CHECK_OUT -> Icons.Default.ExitToApp
-        ServiceType.INSURANCE -> Icons.Default.Security
-        ServiceType.BANKING -> Icons.Default.AccountBalance
-        ServiceType.OTHER -> Icons.Default.MoreHoriz
     }
 }

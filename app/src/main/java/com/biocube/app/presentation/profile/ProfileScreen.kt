@@ -1,5 +1,4 @@
 package com.biocube.app.presentation.profile
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -15,7 +14,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.biocube.app.domain.model.User
+import com.biocube.core.domain.model.User
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -18,3 +18,10 @@ dependencyResolutionManagement {
 
 rootProject.name = "Biocube"
 include(":app")
+include(":features:auth-face")
+include(":features:auth-eye")
+include(":features:auth-voice")
+include(":features:auth-palm")
+include(":features:auth-fingerprint")
+include(":core-data")
+include(":core-ui")

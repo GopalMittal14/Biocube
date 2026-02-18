@@ -15,15 +15,11 @@ import androidx.compose.ui.unit.sp
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.biocube.app.presentation.faceauth.FaceAuthActivity
-import com.biocube.app.domain.repository.IUserRepository
-import com.biocube.app.data.faceauth.FaceAuthService
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 import android.app.Activity
 import android.content.Intent
+import com.biocube.auth.face.FaceAuthActivity
 
 @Composable
 fun SplashScreen(
@@ -94,18 +90,4 @@ fun SplashScreen(
             )
         }
     }
-}
-
-@HiltViewModel
-class SplashViewModel @Inject constructor(
-    private val userRepository: IUserRepository,
-    private val faceAuthService: FaceAuthService
-) : androidx.lifecycle.ViewModel()
-
-{
-    suspend fun getCurrentUserSync() = userRepository.getCurrentUserSync()
-
-    suspend fun hasEnrolledFace(userId: String): Boolean = faceAuthService.hasEnrollment(userId)
-
-    suspend fun logout() = userRepository.logout()
 }

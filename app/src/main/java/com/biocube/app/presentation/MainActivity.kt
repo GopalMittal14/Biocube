@@ -1,5 +1,4 @@
 package com.biocube.app.presentation
-
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
@@ -14,9 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.biocube.app.presentation.navigation.BiocubeNavigation
-import com.biocube.app.presentation.theme.BiocubeTheme
+import com.biocube.core.ui.theme.BiocubeTheme
 import dagger.hilt.android.AndroidEntryPoint
-
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 

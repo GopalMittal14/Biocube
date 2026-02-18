@@ -1,19 +1,14 @@
 package com.biocube.app.presentation.navigation
-
 import androidx.compose.runtime.*
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.biocube.app.domain.repository.IUserRepository
 import com.biocube.app.presentation.login.LoginScreen
 import com.biocube.app.presentation.profile.ProfileScreen
 import com.biocube.app.presentation.services.ServicesScreen
 import com.biocube.app.presentation.splash.SplashScreen
 import com.biocube.app.presentation.usertrainings.UserTrainingsScreen
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
 
 sealed class Screen(val route: String) {
     object Splash : Screen("splash")
@@ -76,14 +71,6 @@ fun BiocubeNavigation(
             UserTrainingsScreen(
                 onNavigateToServices = {
                     navController.navigate(Screen.Services.route)
-                },
-                onLogout = {
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(0) { inclusive = true }
-                    }
-                },
-                onExit = {
-                    // Exit app
                 }
             )
         }

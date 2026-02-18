@@ -2,9 +2,9 @@ package com.biocube.app.presentation.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.biocube.app.domain.model.User
-import com.biocube.app.domain.repository.IUserRepository
-import com.biocube.app.util.Resource
+import com.biocube.core.domain.model.User
+import com.biocube.core.domain.repository.IUserRepository
+import com.biocube.core.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

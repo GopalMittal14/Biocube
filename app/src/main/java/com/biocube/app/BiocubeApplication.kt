@@ -1,22 +1,5 @@
 package com.biocube.app
 import android.app.Application
-import androidx.hilt.work.HiltWorkerFactory
-import androidx.work.Configuration
 import dagger.hilt.android.HiltAndroidApp
-import javax.inject.Inject
-
 @HiltAndroidApp
-class BiocubeApplication : Application(), Configuration.Provider {
-
-    @Inject
-    lateinit var workerFactory: HiltWorkerFactory
-
-    override val workManagerConfiguration: Configuration
-        get() = Configuration.Builder()
-            .setWorkerFactory(workerFactory)
-            .build()
-
-    override fun onCreate() {
-        super.onCreate()
-    }
-}
+class BiocubeApplication : Application()

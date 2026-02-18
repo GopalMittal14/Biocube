@@ -1,15 +1,14 @@
 package com.biocube.app.di
-
 import android.content.Context
 import androidx.room.Room
-import com.biocube.app.data.local.BiocubeDatabase
-import com.biocube.app.data.local.dao.FaceScanDao
-import com.biocube.app.data.local.dao.LocationDao
-import com.biocube.app.data.local.dao.UserDao
-import com.biocube.app.data.remote.api.BiocubeApi
-import com.biocube.app.data.remote.api.MockApiService
-import com.biocube.app.data.repository.*
-import com.biocube.app.domain.repository.*
+import com.biocube.core.data.local.BiocubeDatabase
+import com.biocube.core.data.local.dao.FaceScanDao
+import com.biocube.core.data.local.dao.LocationDao
+import com.biocube.core.data.local.dao.UserDao
+import com.biocube.core.data.remote.api.BiocubeApi
+import com.biocube.core.data.remote.api.MockApiService
+import com.biocube.core.data.repository.*
+import com.biocube.core.domain.repository.*
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.Module
@@ -23,7 +22,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
-
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
