@@ -35,7 +35,7 @@
         android:theme="@style/Theme.Biocube"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
-        
+
         <activity
             android:name=".presentation.MainActivity"
             android:exported="true"
@@ -47,12 +47,22 @@
         </activity>
 
         <activity
-            android:name=".presentation.facescan.FaceScanActivity"
+            android:name="com.biocube.auth.face.facescan.FaceScanActivity"
             android:exported="false"
             android:theme="@style/Theme.Biocube" />
 
         <activity
-            android:name=".presentation.faceauth.FaceAuthActivity"
+            android:name="com.biocube.auth.face.FaceAuthActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Biocube" />
+
+        <activity
+            android:name="com.biocube.auth.eye.EyeAuthActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Biocube" />
+
+        <activity
+            android:name="com.biocube.auth.eye.eyescan.EyeScanActivity"
             android:exported="false"
             android:theme="@style/Theme.Biocube" />
 
@@ -64,17 +74,6 @@
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
-        </provider>
-
-        <!-- WorkManager initialization -->
-        <provider
-            android:name="androidx.startup.InitializationProvider"
-            android:authorities="${applicationId}.androidx-startup"
-            android:exported="false"
-            tools:node="merge">
-            <meta-data
-                android:name="androidx.work.WorkManagerInitializer"
-                android:value="androidx.startup" />
         </provider>
 
     </application>
