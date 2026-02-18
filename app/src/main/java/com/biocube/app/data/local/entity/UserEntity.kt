@@ -1,9 +1,7 @@
 package com.biocube.app.data.local.entity
-
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.biocube.app.domain.model.User
-
 @Entity(tableName = "users")
 data class UserEntity(
     @PrimaryKey

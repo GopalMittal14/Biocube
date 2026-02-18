@@ -1,8 +1,6 @@
 package com.biocube.app.data.faceauth
-
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-
 object FloatArrayCodec {
     fun toByteArray(values: FloatArray): ByteArray {
         val buffer = ByteBuffer

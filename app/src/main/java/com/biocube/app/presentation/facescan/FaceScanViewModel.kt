@@ -63,9 +63,8 @@ class FaceScanViewModel @Inject constructor(
             } catch (e: NoFaceDetectedException) {
                 _saveState.value = FaceScanSaveState.Error("No face detected. Please retake the photo in good lighting.")
             } catch (e: FaceModelUnavailableException) {
-                _saveState.value = FaceScanSaveState.Error(
-                    "Face model not available. Please contact support to install a valid face_auth.tflite model."
-                )
+                val causeMessage = e.cause?.message ?: "Unknown cause"
+                _saveState.value = FaceScanSaveState.Error("Model failed to load: $causeMessage")
             } catch (e: Exception) {
                 _saveState.value = FaceScanSaveState.Error(e.localizedMessage ?: "Failed to save face scan")
             }

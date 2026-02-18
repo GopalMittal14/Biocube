@@ -1,7 +1,5 @@
 package com.biocube.app.data.remote.dto
-
 import com.google.gson.annotations.SerializedName
-
 data class LoginRequest(
     @SerializedName("username")
     val username: String,

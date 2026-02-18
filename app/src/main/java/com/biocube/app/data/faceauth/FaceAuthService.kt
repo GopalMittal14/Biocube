@@ -1,5 +1,4 @@
 package com.biocube.app.data.faceauth
-
 import com.biocube.app.data.local.dao.FaceScanDao
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -16,7 +15,6 @@ class FaceAuthService @Inject constructor(
 
     suspend fun enrollFromImage(userId: String, imagePath: String): FloatArray {
         val embedding = embeddingExtractor.extractEmbeddingFromFile(imagePath)
-        // persistence happens in FaceScanViewModel when it creates FaceScanEntity
         return embedding
     }
 

@@ -1,5 +1,4 @@
 package com.biocube.app.data.service
-
 import android.content.Context
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt

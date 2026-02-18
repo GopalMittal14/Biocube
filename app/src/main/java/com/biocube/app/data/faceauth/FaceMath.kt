@@ -1,5 +1,4 @@
 package com.biocube.app.data.faceauth
-
 import kotlin.math.sqrt
 
 object FaceMath {
@@ -12,10 +11,6 @@ object FaceMath {
         return out
     }
 
-    /**
-     * Returns cosine similarity in [-1, 1]. Higher means "more similar".
-     * Assumes embeddings are already L2-normalized for best behavior.
-     */
     fun cosineSimilarity(a: FloatArray, b: FloatArray): Float {
         require(a.size == b.size) { "Embedding size mismatch: ${a.size} vs ${b.size}" }
         var dot = 0f

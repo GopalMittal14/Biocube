@@ -1,5 +1,4 @@
 package com.biocube.app.data.local.dao
-
 import androidx.room.*
 import com.biocube.app.data.local.entity.UserEntity
 import kotlinx.coroutines.flow.Flow

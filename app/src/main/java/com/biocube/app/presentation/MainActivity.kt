@@ -23,7 +23,6 @@ class MainActivity : ComponentActivity() {
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        // Handle permission results
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

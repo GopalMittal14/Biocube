@@ -1,5 +1,4 @@
 package com.biocube.app.data.remote.api
-
 import android.content.Context
 import com.biocube.app.data.remote.dto.*
 import com.google.gson.Gson
@@ -11,7 +10,6 @@ import kotlinx.coroutines.withContext
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
-
 @Singleton
 class MockApiService @Inject constructor(
     @ApplicationContext private val context: Context,

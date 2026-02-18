@@ -1,5 +1,4 @@
 package com.biocube.app.domain.repository
-
 import com.biocube.app.domain.model.BiometricScan
 import com.biocube.app.domain.model.LocationData
 import com.biocube.app.domain.model.Service

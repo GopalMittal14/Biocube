@@ -1,8 +1,6 @@
 package com.biocube.app.data.remote.api
-
 import com.biocube.app.data.remote.dto.*
 import retrofit2.http.*
-
 interface BiocubeApi {
     
     @POST("api/auth/login")

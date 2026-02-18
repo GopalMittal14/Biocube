@@ -1,10 +1,10 @@
 package com.biocube.app.data.faceauth
-
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.graphics.Rect
+import android.util.Log
 import androidx.exifinterface.media.ExifInterface
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.Face
@@ -15,7 +15,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.tasks.await
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
-import org.tensorflow.lite.gpu.GpuDelegate
 import java.io.FileInputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -38,23 +37,11 @@ class FaceEmbeddingExtractor @Inject constructor(
         FaceDetection.getClient(options)
     }
 
-    private var gpuDelegate: GpuDelegate? = null
-
     private val interpreter: Interpreter by lazy {
         try {
             val options = Interpreter.Options().apply { setNumThreads(4) }
-            // GPU delegate is best-effort; fall back to CPU if unavailable.
-            try {
-                gpuDelegate = GpuDelegate()
-                options.addDelegate(gpuDelegate)
-            } catch (_: Throwable) {
-                gpuDelegate = null
-            }
             Interpreter(loadModelFile(FaceModelConfig.assetPath), options)
         } catch (e: Exception) {
-            // Wrap low-level TensorFlow / IO errors with a clear domain-specific exception.
-            gpuDelegate?.close()
-            gpuDelegate = null
             throw FaceModelUnavailableException(e)
         }
     }
@@ -68,28 +55,39 @@ class FaceEmbeddingExtractor @Inject constructor(
         }
     }
 
-    /**
-     * Extracts an L2-normalized embedding from an image on disk.
-     *
-     * Throws if no face is detected.
-     */
     suspend fun extractEmbeddingFromFile(imagePath: String): FloatArray {
+        Log.d(TAG, "Starting embedding extraction from file: $imagePath")
         val bitmap = BitmapFactory.decodeFile(imagePath)
             ?: throw IllegalArgumentException("Unable to decode image: $imagePath")
+        Log.d(TAG, "Decoded bitmap from file: ${bitmap.width}x${bitmap.height}")
         val rotated = rotateUsingExif(bitmap, imagePath)
         return extractEmbeddingFromBitmap(rotated)
     }
 
     suspend fun extractEmbeddingFromBitmap(bitmap: Bitmap): FloatArray {
-        val face = detectPrimaryFace(bitmap) ?: throw NoFaceDetectedException()
+        Log.d(TAG, "Extracting embedding from bitmap: ${bitmap.width}x${bitmap.height}")
+        val face = detectPrimaryFace(bitmap)
+        if (face == null) {
+            Log.e(TAG, "No face detected in the provided bitmap.")
+            throw NoFaceDetectedException()
+        }
+        Log.d(TAG, "Face detected with bounding box: ${face.boundingBox}")
+
 
         val cropped = cropFace(bitmap, face.boundingBox, marginFraction = 0.25f)
+        Log.d(TAG, "Cropped face bitmap to: ${cropped.width}x${cropped.height}")
+
         val (inputW, inputH, inputC) = inputImageShape()
         require(inputC == 3) { "Model expects $inputC channels (expected 3)." }
+        Log.d(TAG, "Model input shape: $inputW x $inputH x $inputC")
+
 
         val scaled = Bitmap.createScaledBitmap(cropped, inputW, inputH, true)
+        Log.d(TAG, "Scaled bitmap to model input size: ${scaled.width}x${scaled.height}")
+
 
         val embedding = runModel(scaled)
+        Log.d(TAG, "Successfully ran model and got embedding.")
         return FaceMath.l2Normalize(embedding)
     }
 
@@ -104,14 +102,13 @@ class FaceEmbeddingExtractor @Inject constructor(
         try {
             interpreter.close()
         } catch (_: Throwable) {}
-        try {
-            gpuDelegate?.close()
-        } catch (_: Throwable) {}
     }
 
     private suspend fun detectPrimaryFace(bitmap: Bitmap): Face? {
+        Log.d(TAG, "Detecting face in bitmap: ${bitmap.width}x${bitmap.height}")
         val image = InputImage.fromBitmap(bitmap, /* rotationDegrees = */ 0)
         val faces = faceDetector.process(image).await()
+        Log.d(TAG, "ML Kit found ${faces.size} faces.")
         return faces.maxByOrNull { it.boundingBox.width() * it.boundingBox.height() }
     }
 
@@ -126,11 +123,13 @@ class FaceEmbeddingExtractor @Inject constructor(
 
         val w = (right - left).coerceAtLeast(1)
         val h = (bottom - top).coerceAtLeast(1)
+        Log.d(TAG, "Cropping rect: [l=$left, t=$top, r=$right, b=$bottom], final size: ${w}x${h}")
         return Bitmap.createBitmap(source, left, top, w, h)
     }
 
     private fun inputImageShape(): Triple<Int, Int, Int> {
         val shape = interpreter.getInputTensor(0).shape()
+        Log.d(TAG, "Model input tensor shape: ${shape.contentToString()}")
         // Common shapes: [1, H, W, 3] or [1, W, H, 3] (rare).
         require(shape.size == 4) { "Unexpected input tensor rank: ${shape.contentToString()}" }
         val h = shape[1]
@@ -202,20 +201,34 @@ class FaceEmbeddingExtractor @Inject constructor(
     private fun rotateUsingExif(bitmap: Bitmap, imagePath: String): Bitmap {
         val rotation = try {
             val exif = ExifInterface(imagePath)
-            when (exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)) {
+            val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+            Log.d(TAG, "EXIF Orientation: $orientation")
+            when (orientation) {
                 ExifInterface.ORIENTATION_ROTATE_90 -> 90
                 ExifInterface.ORIENTATION_ROTATE_180 -> 180
                 ExifInterface.ORIENTATION_ROTATE_270 -> 270
                 else -> 0
             }
-        } catch (_: Throwable) {
+        } catch (e: Throwable) {
+            Log.e(TAG, "Could not read EXIF data from $imagePath", e)
             0
         }
 
-        if (rotation == 0) return bitmap
+        if (rotation == 0) {
+            Log.d(TAG, "No EXIF rotation needed.")
+            return bitmap
+        }
 
+
+        Log.d(TAG, "Applying EXIF rotation of $rotation degrees.")
         val matrix = Matrix().apply { postRotate(rotation.toFloat()) }
-        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+        val newBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+        Log.d(TAG, "Rotated bitmap size: ${newBitmap.width}x${newBitmap.height}")
+        return newBitmap
+    }
+
+    companion object {
+        private const val TAG = "FaceEmbeddingExtractor"
     }
 }
 
@@ -227,4 +240,3 @@ class FaceModelUnavailableException(
     "Face authentication model is not available. Please ensure face_auth.tflite exists in assets and is a valid TensorFlow Lite model.",
     cause
 )
-

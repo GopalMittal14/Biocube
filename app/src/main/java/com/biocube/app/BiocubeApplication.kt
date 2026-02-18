@@ -1,5 +1,4 @@
 package com.biocube.app
-
 import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration

@@ -1,5 +1,4 @@
 package com.biocube.app.data.local
-
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.biocube.app.data.local.dao.FaceScanDao
@@ -8,7 +7,6 @@ import com.biocube.app.data.local.dao.UserDao
 import com.biocube.app.data.local.entity.FaceScanEntity
 import com.biocube.app.data.local.entity.LocationEntity
 import com.biocube.app.data.local.entity.UserEntity
-
 @Database(
     entities = [
         UserEntity::class,

@@ -1,5 +1,4 @@
 package com.biocube.app.data.repository
-
 import com.biocube.app.data.remote.api.BiocubeApi
 import com.biocube.app.domain.model.BiometricScan
 import com.biocube.app.domain.model.ScanType
