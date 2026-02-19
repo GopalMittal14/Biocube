@@ -2,7 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application>
         <activity
-            android:name="com.biocube.auth.fingerprint.fingerprintscan.FingerprintScanActivity"
+            android:name="com.biocube.auth.fingerprint.presentation.fingerprintscan.FingerprintScanActivity"
+            android:exported="false" />
+        <activity
+            android:name="com.biocube.auth.fingerprint.presentation.FingerprintAuthActivity"
             android:exported="false" />
     </application>
 </manifest>

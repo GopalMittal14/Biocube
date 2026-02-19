@@ -2,7 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application>
         <activity
-            android:name="com.biocube.auth.eye.eyescan.EyeScanActivity"
+            android:name="com.biocube.auth.eye.presentation.eyescan.EyeScanActivity"
+            android:exported="false" />
+        <activity
+            android:name="com.biocube.auth.eye.presentation.EyeAuthActivity"
             android:exported="false" />
     </application>
 </manifest>

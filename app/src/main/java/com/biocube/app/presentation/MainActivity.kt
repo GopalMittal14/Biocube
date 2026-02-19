@@ -13,7 +13,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.biocube.navigation.BiocubeNavigation
+import com.biocube.navigation.presentation.BiocubeNavigation
 import com.biocube.core.ui.theme.BiocubeTheme
 import dagger.hilt.android.AndroidEntryPoint
 
